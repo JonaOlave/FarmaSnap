@@ -1,1 +1,4 @@
 .superpowers/
+node_modules/
+mobile/.env
+eval/fotos/

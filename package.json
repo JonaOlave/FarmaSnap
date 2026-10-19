@@ -1,0 +1,27 @@
+{
+  "name": "farmasnap",
+  "version": "1.0.0",
+  "description": "App móvil familiar para saber, **antes de comprar un medicamento, si ya lo tienen en casa**.",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JonaOlave/FarmaSnap.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/JonaOlave/FarmaSnap/issues"
+  },
+  "homepage": "https://github.com/JonaOlave/FarmaSnap#readme",
+  "devDependencies": {
+    "supabase": "^2.121.0"
+  }
+}
