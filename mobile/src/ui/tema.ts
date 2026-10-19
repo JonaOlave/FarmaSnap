@@ -1,0 +1,16 @@
+export const colores = {
+  fondo: '#f7faf9',
+  tinta: '#14302b',
+  suave: '#6b807b',
+  linea: '#dfe7e5',
+  marca: '#0f8a75',
+  marcaOscuro: '#0b6b5b',
+  marcaClaro: '#e3f4f0',
+  ok: '#1f9d55',
+  okClaro: '#e5f6ec',
+  eq: '#c27c0e',
+  eqClaro: '#fdf3e1',
+  no: '#c0392b',
+  noClaro: '#fbeaea',
+  blanco: '#ffffff',
+} as const;
