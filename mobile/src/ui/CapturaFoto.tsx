@@ -1,6 +1,6 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { launchImageLibraryAsync } from 'expo-image-picker';
-import { useRef, useState } from 'react';
+import { type ReactNode, useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type FotoPreparada, prepararFoto } from '../datos/imagen';
@@ -11,9 +11,17 @@ interface Props {
   onCaptura: (foto: FotoPreparada) => void;
   onCancelar: () => void;
   indicacion?: string;
+  /** Lado mayor de la foto enviada a la IA. */
+  maximo?: number;
+  /** Forma del marco de encuadre. */
+  marco?: 'caja' | 'hoja';
+  /** Contenido bajo la indicación (por ejemplo, un selector de modo). */
+  superior?: ReactNode;
 }
 
-export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el frente de la caja' }: Props) {
+export function CapturaFoto({
+  onCaptura, onCancelar, indicacion = 'Encuadra el frente de la caja', maximo, marco = 'caja', superior,
+}: Props) {
   const [permiso, pedirPermiso] = useCameraPermissions();
   const camara = useRef<CameraView>(null);
   const [procesando, setProcesando] = useState(false);
@@ -27,7 +35,7 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
     try {
       const resultado = await launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9 });
       const foto = resultado.canceled ? undefined : resultado.assets[0];
-      if (foto) onCaptura(await prepararFoto(foto.uri, foto.width, foto.height));
+      if (foto) onCaptura(await prepararFoto(foto.uri, foto.width, foto.height, maximo));
     } catch {
       Alert.alert('No se pudo abrir la foto', 'Inténtalo de nuevo.');
     } finally {
@@ -51,7 +59,7 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
     setProcesando(true);
     try {
       const foto = await camara.current.takePictureAsync({ quality: 0.9 });
-      if (foto) onCaptura(await prepararFoto(foto.uri, foto.width, foto.height));
+      if (foto) onCaptura(await prepararFoto(foto.uri, foto.width, foto.height, maximo));
     } catch {
       Alert.alert('No se pudo tomar la foto', 'Inténtalo de nuevo.');
     } finally {
@@ -63,7 +71,8 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
     <View style={estilos.negro}>
       <CameraView ref={camara} style={StyleSheet.absoluteFill} facing="back" />
       <Text style={estilos.indicacion}>{indicacion}</Text>
-      <View style={estilos.marco} pointerEvents="none" />
+      {superior && <View style={estilos.superior}>{superior}</View>}
+      <View style={[estilos.marco, marco === 'hoja' && estilos.hoja]} pointerEvents="none" />
       <View style={[estilos.barra, { height: 120 + margen.bottom, paddingBottom: margen.bottom }]}>
         <Pressable onPress={onCancelar} style={estilos.lado}><Text style={estilos.cancelar}>Cancelar</Text></Pressable>
         <Pressable accessibilityLabel="Tomar foto" onPress={capturar} disabled={procesando} style={estilos.obturador}>
@@ -84,6 +93,8 @@ const estilos = StyleSheet.create({
   indicacion: { position: 'absolute', top: 20, left: 0, right: 0, textAlign: 'center', color: colores.blanco, fontSize: 14 },
   marco: { position: 'absolute', top: '25%', left: '10%', right: '10%', height: '35%', borderWidth: 3,
     borderColor: 'rgba(255,255,255,0.85)', borderRadius: 16 },
+  hoja: { top: '12%', left: '8%', right: '8%', height: '62%' },
+  superior: { position: 'absolute', top: 48, left: 0, right: 0, alignItems: 'center' },
   barra: { position: 'absolute', bottom: 0, left: 0, right: 0, height: 120, backgroundColor: 'rgba(13,19,18,0.85)',
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 },
   lado: { width: 80 },

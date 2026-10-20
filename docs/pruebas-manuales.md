@@ -26,6 +26,17 @@ Ejecutar en un Android con Expo Go (o con el APK) antes de cada versión. Marcar
 - [ ] Producto sin stock → rojo "Lo tenían, pero se acabó".
 - [ ] "Lo compré · registrar" abre el formulario prellenado con la misma foto.
 
+## Receta
+- [ ] En la cámara de búsqueda, el selector Caja | Receta cambia la indicación y el marco.
+- [ ] Receta "Recetas solicitadas" (Coritex forte, Fesema, Ibuprofeno forte) → lista los 3 y nada más.
+- [ ] Receta con indicaciones largas (Budesonida, Berodual, Acemuk, Azitromicina) → lista los 4, sin "probióticos".
+- [ ] Cada estado se ve con su color: En casa (verde), Similar (ámbar), Sin stock (rojo), No registrado (blanco).
+- [ ] Una marca con principio deducido muestra "Según la IA contiene…".
+- [ ] Tocar una fila con medicamento en casa abre su detalle.
+- [ ] Tras buscar por receta, el stock de todos los medicamentos sigue igual.
+- [ ] Una foto que no es receta → "No encontré medicamentos en la receta…".
+- [ ] Receta desde "Galería" funciona igual que con la cámara.
+
 ## Detalle
 - [ ] Editar datos y guardar; editar a un duplicado muestra "Ya existe".
 - [ ] Eliminar con confirmación.
