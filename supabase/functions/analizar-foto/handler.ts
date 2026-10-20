@@ -1,4 +1,4 @@
-import { base64Valido, type Extraccion } from "./logica.ts";
+import { base64Valido, type Extraccion, type ExtraccionReceta } from "./logica.ts";
 
 export interface Dependencias {
   /** Devuelve el id del usuario si el token es válido; null si no. */
@@ -6,6 +6,7 @@ export interface Dependencias {
   /** Suma un uso del día; true si sigue dentro del límite. */
   registrarUso(authorization: string): Promise<boolean>;
   extraer(imagenBase64: string): Promise<Extraccion>;
+  extraerReceta(imagenBase64: string): Promise<ExtraccionReceta>;
 }
 
 function json(cuerpo: unknown, estado: number): Response {
@@ -31,13 +32,14 @@ export function crearHandler(deps: Dependencias) {
       } catch {
         return json({ error: "cuerpo_invalido" }, 400);
       }
-      const imagen = (cuerpo as { imagen_base64?: unknown } | null)?.imagen_base64;
+      const { imagen_base64: imagen, tipo = "caja" } = (cuerpo ?? {}) as { imagen_base64?: unknown; tipo?: unknown };
       if (!base64Valido(imagen)) return json({ error: "imagen_invalida" }, 400);
+      if (tipo !== "caja" && tipo !== "receta") return json({ error: "tipo_invalido" }, 400);
 
       if (!(await deps.registrarUso(authorization))) return json({ error: "limite_diario" }, 429);
 
       try {
-        return json(await deps.extraer(imagen), 200);
+        return json(await (tipo === "receta" ? deps.extraerReceta(imagen) : deps.extraer(imagen)), 200);
       } catch (error) {
         console.error("Extracción fallida:", error);
         return json({ error: "ia_no_disponible" }, 502);

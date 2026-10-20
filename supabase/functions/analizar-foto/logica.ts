@@ -54,22 +54,25 @@ function textoONuloDe(valor: unknown): string | null {
   return recortado === "" ? null : recortado;
 }
 
+function limpiarPrincipios(valor: unknown): string[] {
+  if (!Array.isArray(valor)) return [];
+  return [
+    ...new Set(
+      valor
+        .filter((p): p is string => typeof p === "string")
+        .map((p) => p.replace(/\s+/g, " ").trim().toLowerCase())
+        .filter((p) => p !== ""),
+    ),
+  ];
+}
+
 export function validarExtraccion(dato: unknown): Extraccion {
   if (typeof dato !== "object" || dato === null || Array.isArray(dato)) {
     throw new Error("respuesta_invalida");
   }
   const d = dato as Record<string, unknown>;
   const nombre = textoONuloDe(d.nombre_comercial);
-  const principios = Array.isArray(d.principios_activos)
-    ? [
-      ...new Set(
-        d.principios_activos
-          .filter((p): p is string => typeof p === "string")
-          .map((p) => p.replace(/\s+/g, " ").trim().toLowerCase())
-          .filter((p) => p !== ""),
-      ),
-    ]
-    : [];
+  const principios = limpiarPrincipios(d.principios_activos);
   return {
     legible: d.legible === true && nombre !== null,
     es_medicamento: d.es_medicamento === true,
@@ -86,4 +89,83 @@ export function base64Valido(valor: unknown): valor is string {
     valor.length >= 100 &&
     valor.length <= 7_000_000 &&
     /^[A-Za-z0-9+/=\r\n]+$/.test(valor.slice(0, 500));
+}
+
+export const ESQUEMA_RECETA = {
+  type: "object",
+  properties: {
+    es_receta: { type: "boolean" },
+    medicamentos: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          nombre: { type: "string" },
+          principios_activos: { type: "array", items: { type: "string" } },
+          principios_deducidos: { type: "boolean" },
+          dosis: textoONulo,
+          forma: textoONulo,
+        },
+        required: ["nombre", "principios_activos", "principios_deducidos", "dosis", "forma"],
+        additionalProperties: false,
+      },
+    },
+  },
+  required: ["es_receta", "medicamentos"],
+  additionalProperties: false,
+} as const;
+
+export const INSTRUCCIONES_RECETA = `Lees fotos de recetas médicas impresas de Chile y listas los medicamentos recetados.
+
+Reglas:
+- medicamentos: cada medicamento recetado, en el orden de la receta. Ignora indicaciones, posología, duración, diagnóstico y los datos del paciente, del médico y de la clínica.
+- Ignora recomendaciones sin un producto concreto (por ejemplo "tomar probióticos").
+- nombre: como está escrito en la receta (marca o genérico), sin la dosis ni la forma. Por ejemplo "Ibuprofeno forte", "Berodual", "Azitromicina".
+- principios_activos: cada principio activo con su nombre genérico (DCI) en español, en minúsculas y sin la sal. Si la receta ya dice el genérico, úsalo. Si solo trae la marca y conoces con seguridad su composición en Chile, inclúyela y marca principios_deducidos: true; si no la conoces con seguridad, deja la lista vacía. Nunca inventes.
+- dosis: la concentración si aparece, por ejemplo "500 mg", "200 mg/5 ml", "200 µg"; si no, null.
+- forma: comprimidos, cápsulas, jarabe, suspensión, gotas, inhalador, crema, etc., en minúsculas. Si no está escrita, dedúcela de la indicación ("gotas" → gotas, "puff" → inhalador, "ml" → jarabe o suspensión); si no se puede, null.
+- La hoja puede estar girada o con sombras; léela igual.
+- es_receta: false si la foto no es una receta médica.`;
+
+export interface MedicamentoRecetado {
+  nombre: string;
+  principios_activos: string[];
+  principios_deducidos: boolean;
+  dosis: string | null;
+  forma: string | null;
+}
+
+export interface ExtraccionReceta {
+  es_receta: boolean;
+  medicamentos: MedicamentoRecetado[];
+}
+
+function claveNombre(nombre: string): string {
+  return nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
+export function validarReceta(dato: unknown): ExtraccionReceta {
+  if (typeof dato !== "object" || dato === null || Array.isArray(dato)) {
+    throw new Error("respuesta_invalida");
+  }
+  const d = dato as Record<string, unknown>;
+  if (d.es_receta !== true) return { es_receta: false, medicamentos: [] };
+  const vistos = new Set<string>();
+  const medicamentos: MedicamentoRecetado[] = [];
+  for (const item of Array.isArray(d.medicamentos) ? d.medicamentos : []) {
+    if (typeof item !== "object" || item === null) continue;
+    const m = item as Record<string, unknown>;
+    const nombre = textoONuloDe(m.nombre);
+    if (nombre === null || vistos.has(claveNombre(nombre))) continue;
+    vistos.add(claveNombre(nombre));
+    const principios = limpiarPrincipios(m.principios_activos);
+    medicamentos.push({
+      nombre,
+      principios_activos: principios,
+      principios_deducidos: m.principios_deducidos === true && principios.length > 0,
+      dosis: textoONuloDe(m.dosis),
+      forma: textoONuloDe(m.forma)?.toLowerCase() ?? null,
+    });
+  }
+  return { es_receta: true, medicamentos };
 }

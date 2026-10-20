@@ -1,6 +1,6 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@supabase/supabase-js";
-import { type ClienteMensajes, extraerDeImagen } from "./claude.ts";
+import { type ClienteMensajes, extraerDeImagen, extraerReceta } from "./claude.ts";
 import { crearHandler } from "./handler.ts";
 import { LIMITE_DIARIO } from "./logica.ts";
 
@@ -31,4 +31,5 @@ Deno.serve(crearHandler({
     return data === true;
   },
   extraer: (imagen) => extraerDeImagen(anthropic as unknown as ClienteMensajes, imagen),
+  extraerReceta: (imagen) => extraerReceta(anthropic as unknown as ClienteMensajes, imagen),
 }));

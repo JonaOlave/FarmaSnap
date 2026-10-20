@@ -1,4 +1,14 @@
-import { ESQUEMA, type Extraccion, INSTRUCCIONES, MODELO, validarExtraccion } from "./logica.ts";
+import {
+  ESQUEMA,
+  ESQUEMA_RECETA,
+  type Extraccion,
+  type ExtraccionReceta,
+  INSTRUCCIONES,
+  INSTRUCCIONES_RECETA,
+  MODELO,
+  validarExtraccion,
+  validarReceta,
+} from "./logica.ts";
 
 /** Subconjunto del cliente de Anthropic que usamos; permite inyectar un cliente falso en pruebas. */
 export interface ClienteMensajes {
@@ -17,17 +27,23 @@ export class ErrorExtraccion extends Error {
   }
 }
 
-export async function extraerDeImagen(cliente: ClienteMensajes, imagenBase64: string): Promise<Extraccion> {
+async function pedir(
+  cliente: ClienteMensajes,
+  imagenBase64: string,
+  system: string,
+  schema: unknown,
+  texto: string,
+): Promise<unknown> {
   const respuesta = await cliente.messages.create({
     model: MODELO,
     max_tokens: 4000,
-    system: INSTRUCCIONES,
-    output_config: { effort: "low", format: { type: "json_schema", schema: ESQUEMA } },
+    system,
+    output_config: { effort: "low", format: { type: "json_schema", schema } },
     messages: [{
       role: "user",
       content: [
         { type: "image", source: { type: "base64", media_type: "image/jpeg", data: imagenBase64 } },
-        { type: "text", text: "Extrae los datos de esta caja de medicamento." },
+        { type: "text", text: texto },
       ],
     }],
   });
@@ -37,5 +53,17 @@ export async function extraerDeImagen(cliente: ClienteMensajes, imagenBase64: st
   }
   const bloque = respuesta.content.find((b) => b.type === "text");
   if (!bloque?.text) throw new ErrorExtraccion("sin_texto");
-  return validarExtraccion(JSON.parse(bloque.text));
+  return JSON.parse(bloque.text);
+}
+
+export async function extraerDeImagen(cliente: ClienteMensajes, imagenBase64: string): Promise<Extraccion> {
+  return validarExtraccion(
+    await pedir(cliente, imagenBase64, INSTRUCCIONES, ESQUEMA, "Extrae los datos de esta caja de medicamento."),
+  );
+}
+
+export async function extraerReceta(cliente: ClienteMensajes, imagenBase64: string): Promise<ExtraccionReceta> {
+  return validarReceta(
+    await pedir(cliente, imagenBase64, INSTRUCCIONES_RECETA, ESQUEMA_RECETA, "Lista los medicamentos de esta receta."),
+  );
 }

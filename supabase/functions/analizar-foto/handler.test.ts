@@ -1,6 +1,6 @@
 import { assertEquals } from "@std/assert";
 import { crearHandler, type Dependencias } from "./handler.ts";
-import type { Extraccion } from "./logica.ts";
+import type { Extraccion, ExtraccionReceta } from "./logica.ts";
 
 const extraccion: Extraccion = {
   legible: true,
@@ -11,6 +11,10 @@ const extraccion: Extraccion = {
   forma: "comprimidos",
   laboratorio: null,
 };
+const receta: ExtraccionReceta = {
+  es_receta: true,
+  medicamentos: [{ nombre: "Fesema", principios_activos: [], principios_deducidos: false, dosis: null, forma: null }],
+};
 const IMAGEN = "A".repeat(200);
 
 function deps(cambios: Partial<Dependencias> = {}): Dependencias {
@@ -18,6 +22,7 @@ function deps(cambios: Partial<Dependencias> = {}): Dependencias {
     usuarioDesdeToken: () => Promise.resolve("usuario-1"),
     registrarUso: () => Promise.resolve(true),
     extraer: () => Promise.resolve(extraccion),
+    extraerReceta: () => Promise.resolve(receta),
     ...cambios,
   };
 }
@@ -79,4 +84,49 @@ Deno.test("502 cuando la IA falla", async () => {
 Deno.test("500 cuando falla el registro de uso", async () => {
   const d = deps({ registrarUso: () => Promise.reject(new Error("db caída")) });
   assertEquals((await llamar(d, peticion({ imagen_base64: IMAGEN }))).estado, 500);
+});
+
+function contando() {
+  const n = { extraer: 0, extraerReceta: 0, usos: 0 };
+  const d = deps({
+    extraer: () => (n.extraer++, Promise.resolve(extraccion)),
+    extraerReceta: () => (n.extraerReceta++, Promise.resolve(receta)),
+    registrarUso: () => (n.usos++, Promise.resolve(true)),
+  });
+  return { n, d };
+}
+
+Deno.test("sin tipo usa la lectura de caja", async () => {
+  const { n, d } = contando();
+  assertEquals((await llamar(d, peticion({ imagen_base64: IMAGEN }))).cuerpo, extraccion);
+  assertEquals([n.extraer, n.extraerReceta], [1, 0]);
+});
+
+Deno.test("tipo caja explícito usa la lectura de caja", async () => {
+  const { n, d } = contando();
+  assertEquals((await llamar(d, peticion({ imagen_base64: IMAGEN, tipo: "caja" }))).cuerpo, extraccion);
+  assertEquals([n.extraer, n.extraerReceta], [1, 0]);
+});
+
+Deno.test("tipo receta usa extraerReceta y registra un uso", async () => {
+  const { n, d } = contando();
+  const r = await llamar(d, peticion({ imagen_base64: IMAGEN, tipo: "receta" }));
+  assertEquals(r.estado, 200);
+  assertEquals(r.cuerpo, receta);
+  assertEquals([n.extraer, n.extraerReceta, n.usos], [0, 1, 1]);
+});
+
+Deno.test("400 tipo_invalido sin registrar uso", async () => {
+  const { n, d } = contando();
+  const r = await llamar(d, peticion({ imagen_base64: IMAGEN, tipo: "otro" }));
+  assertEquals(r.estado, 400);
+  assertEquals(r.cuerpo, { error: "tipo_invalido" });
+  assertEquals(n.usos, 0);
+});
+
+Deno.test("502 si falla la lectura de la receta", async () => {
+  const d = deps({ extraerReceta: () => Promise.reject(new Error("caída")) });
+  const r = await llamar(d, peticion({ imagen_base64: IMAGEN, tipo: "receta" }));
+  assertEquals(r.estado, 502);
+  assertEquals(r.cuerpo, { error: "ia_no_disponible" });
 });
