@@ -18,7 +18,10 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.jonaolave.farmasnap"
+      "package": "com.jonaolave.farmasnap",
+      "blockedPermissions": [
+        "android.permission.RECORD_AUDIO"
+      ]
     },
     "web": {
       "output": "single",
@@ -37,13 +40,25 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "FarmaSnap usa la cámara para leer las cajas de los medicamentos."
+          "cameraPermission": "FarmaSnap usa la cámara para leer las cajas de los medicamentos.",
+          "recordAudioAndroidPermission": false
         }
       ]
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
-    }
+    },
+    "extra": {
+      "router": {
+        "asyncRoutes": {
+          "web": true
+        }
+      },
+      "eas": {
+        "projectId": "7ed97ed8-8a53-4f9c-97ee-f87276a09ce9"
+      }
+    },
+    "owner": "jonaolave"
   }
 }
