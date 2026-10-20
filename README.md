@@ -37,3 +37,21 @@ Supabase
 
 ![Pantallas: inicio de sesión, inventario y cámara](docs/mockups/pantallas-1-login-inventario-camara.jpg)
 ![Pantallas: registro, búsqueda por foto y detalle](docs/mockups/pantallas-2-registro-busqueda-detalle.jpg)
+
+## Cómo ejecutar
+
+**Requisitos:** Node 20+, Docker y Deno (para las pruebas), Expo Go en un Android.
+
+```bash
+# Pruebas de base de datos (Supabase local)
+npx supabase start && npx supabase test db
+
+# Pruebas de la Edge Function
+cd supabase/functions/analizar-foto && deno test
+
+# App: copiar mobile/.env.example a mobile/.env con los datos del proyecto Supabase
+cd mobile && npm install && npx jest && npx expo start   # escanear el QR con Expo Go
+```
+
+- Pruebas manuales: [docs/pruebas-manuales.md](docs/pruebas-manuales.md)
+- APK: `npx eas-cli build --platform android --profile preview` (en `mobile/`)
