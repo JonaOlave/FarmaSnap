@@ -1,4 +1,4 @@
-import { dimensionesDestino } from '../dimensiones';
+import { dimensionesDestino, LADO_RECETA } from '../dimensiones';
 
 describe('dimensionesDestino', () => {
   it('limita el lado mayor a 1000 px', () => {
@@ -8,5 +8,9 @@ describe('dimensionesDestino', () => {
 
   it('no agranda fotos pequeñas', () => {
     expect(dimensionesDestino(800, 600)).toEqual({ width: 800 });
+  });
+
+  it('permite un lado mayor para recetas', () => {
+    expect(dimensionesDestino(3000, 4000, LADO_RECETA)).toEqual({ height: 1568 });
   });
 });
