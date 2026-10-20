@@ -1,6 +1,7 @@
 import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useInventario } from '../src/datos/InventarioContext';
 import { supabase } from '../src/datos/supabase';
 import { buscarPorTexto } from '../src/dominio/buscar';
@@ -17,6 +18,7 @@ export default function Inventario() {
   const [consulta, setConsulta] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
   const [refrescando, setRefrescando] = useState(false);
+  const margen = useSafeAreaInsets();
 
   const visibles = useMemo(
     () =>
@@ -102,7 +104,7 @@ export default function Inventario() {
       />
 
       <Pressable disabled={sinConexion} onPress={() => router.push('/registrar')}
-        style={[estilos.fab, sinConexion && estilos.inactivo]}>
+        style={[estilos.fab, { bottom: 24 + margen.bottom }, sinConexion && estilos.inactivo]}>
         <Text style={estilos.fabTexto}>+  Registrar</Text>
       </Pressable>
     </View>

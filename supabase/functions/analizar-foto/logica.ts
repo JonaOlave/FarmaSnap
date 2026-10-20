@@ -30,7 +30,7 @@ export const INSTRUCCIONES = `Lees fotos de cajas de medicamentos vendidos en Ch
 
 Reglas:
 - nombre_comercial: la marca tal como aparece en la caja (por ejemplo "Kitadol", "Tapsin Día"). Si el producto se vende por su nombre genérico, usa ese nombre (por ejemplo "Paracetamol").
-- principios_activos: cada principio activo con su nombre genérico (DCI) en español y en minúsculas, por ejemplo "paracetamol", nunca "acetaminofén" ni "Paracetamol 500 mg". Si hay varios, inclúyelos todos.
+- principios_activos: cada principio activo con su nombre genérico (DCI) en español y en minúsculas, por ejemplo "paracetamol", nunca "acetaminofén" ni "Paracetamol 500 mg". Sin la sal ni el hidrato: "fenoterol", no "bromhidrato de fenoterol"; "diclofenaco", no "diclofenaco sódico". Si hay varios, inclúyelos todos.
 - dosis: la concentración principal como aparece, por ejemplo "500 mg", "1 g", "100 mg/5 ml".
 - forma: comprimidos, cápsulas, jarabe, gotas, crema, suspensión, etc., en minúsculas.
 - laboratorio: el fabricante si aparece.

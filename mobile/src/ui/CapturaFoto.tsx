@@ -1,6 +1,7 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { type FotoPreparada, prepararFoto } from '../datos/imagen';
 import { Boton } from './Boton';
 import { colores } from './tema';
@@ -15,6 +16,7 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
   const [permiso, pedirPermiso] = useCameraPermissions();
   const camara = useRef<CameraView>(null);
   const [procesando, setProcesando] = useState(false);
+  const margen = useSafeAreaInsets();
 
   if (!permiso) return <View style={estilos.negro} />;
 
@@ -46,7 +48,7 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
       <CameraView ref={camara} style={StyleSheet.absoluteFill} facing="back" />
       <Text style={estilos.indicacion}>{indicacion}</Text>
       <View style={estilos.marco} pointerEvents="none" />
-      <View style={estilos.barra}>
+      <View style={[estilos.barra, { height: 120 + margen.bottom, paddingBottom: margen.bottom }]}>
         <Pressable onPress={onCancelar} style={estilos.lado}><Text style={estilos.cancelar}>Cancelar</Text></Pressable>
         <Pressable accessibilityLabel="Tomar foto" onPress={capturar} disabled={procesando} style={estilos.obturador}>
           {procesando ? <ActivityIndicator color={colores.blanco} /> : <View style={estilos.obturadorInterno} />}
