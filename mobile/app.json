@@ -49,7 +49,7 @@
         "expo-image-picker",
         {
           "photosPermission": "FarmaSnap usa tus fotos para leer las cajas de los medicamentos.",
-          "cameraPermission": false,
+          "cameraPermission": "FarmaSnap usa la cámara para leer las cajas y recetas de los medicamentos.",
           "microphonePermission": false
         }
       ]
