@@ -39,3 +39,28 @@ export type ResultadoBusqueda =
   | { tipo: 'tiene'; medicamento: Medicamento }
   | { tipo: 'equivalente'; coincidencias: CoincidenciaEquivalente[] }
   | { tipo: 'no_tiene'; agotado: Medicamento | null };
+
+/** Un medicamento leído de una receta (respuesta de `analizar-foto` con tipo receta). */
+export interface MedicamentoRecetado {
+  nombre: string;
+  principios_activos: string[];
+  principios_deducidos: boolean;
+  dosis: string | null;
+  forma: string | null;
+}
+
+export interface ExtraccionReceta {
+  es_receta: boolean;
+  medicamentos: MedicamentoRecetado[];
+}
+
+export type EstadoReceta =
+  | { tipo: 'en_casa'; medicamento: Medicamento }
+  | { tipo: 'similar'; coincidencias: CoincidenciaEquivalente[] }
+  | { tipo: 'sin_stock'; medicamento: Medicamento }
+  | { tipo: 'no_registrado' };
+
+export interface FilaReceta {
+  recetado: MedicamentoRecetado;
+  estado: EstadoReceta;
+}
