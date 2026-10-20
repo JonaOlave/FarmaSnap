@@ -64,7 +64,7 @@ export default function Inventario() {
       <Stack.Screen options={{ headerRight: () => <Pressable onPress={salir}><Text style={estilos.salir}>Salir</Text></Pressable> }} />
 
       <View style={estilos.busqueda}>
-        <TextInput style={estilos.campo} value={consulta} onChangeText={setConsulta}
+        <TextInput style={estilos.campo} placeholderTextColor={colores.suave} value={consulta} onChangeText={setConsulta}
           placeholder="Buscar por nombre o componente…" clearButtonMode="while-editing" />
         <Pressable accessibilityLabel="Buscar por foto" disabled={sinConexion}
           onPress={() => router.push('/buscar-foto')} style={[estilos.camara, sinConexion && estilos.inactivo]}>
@@ -115,7 +115,7 @@ const estilos = StyleSheet.create({
   pantalla: { flex: 1, paddingHorizontal: 14, paddingTop: 10, backgroundColor: colores.fondo },
   salir: { color: colores.marcaOscuro, fontWeight: '600' },
   busqueda: { flexDirection: 'row', gap: 8, marginBottom: 10 },
-  campo: { flex: 1, backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 14,
+  campo: { flex: 1, color: colores.tinta, backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 14,
     paddingHorizontal: 12, paddingVertical: 10, fontSize: 15 },
   camara: { width: 48, borderRadius: 14, backgroundColor: colores.marca, alignItems: 'center', justifyContent: 'center' },
   camaraTexto: { fontSize: 20 },

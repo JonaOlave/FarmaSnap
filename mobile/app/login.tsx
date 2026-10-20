@@ -32,10 +32,10 @@ export default function Login() {
       <Text style={estilos.lema}>El botiquín de la casa, en tu bolsillo</Text>
 
       <Text style={estilos.etiqueta}>CORREO</Text>
-      <TextInput style={estilos.campo} value={correo} onChangeText={setCorreo} autoCapitalize="none"
+      <TextInput style={estilos.campo} placeholderTextColor={colores.suave} value={correo} onChangeText={setCorreo} autoCapitalize="none"
         autoComplete="email" keyboardType="email-address" placeholder="nombre@correo.cl" />
       <Text style={estilos.etiqueta}>CONTRASEÑA</Text>
-      <TextInput style={estilos.campo} value={clave} onChangeText={setClave} secureTextEntry
+      <TextInput style={estilos.campo} placeholderTextColor={colores.suave} value={clave} onChangeText={setClave} secureTextEntry
         autoComplete="password" placeholder="••••••••" />
 
       {error && <Text style={estilos.error}>{error}</Text>}
@@ -53,7 +53,7 @@ const estilos = StyleSheet.create({
   titulo: { fontSize: 26, fontWeight: '700', textAlign: 'center', color: colores.tinta },
   lema: { textAlign: 'center', color: colores.suave, marginBottom: 24 },
   etiqueta: { fontSize: 11, fontWeight: '600', color: colores.suave, marginTop: 10 },
-  campo: { backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 11,
+  campo: { color: colores.tinta, backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 11,
     padding: 12, marginTop: 4, fontSize: 15 },
   error: { color: colores.no, marginTop: 12 },
   nota: { textAlign: 'center', color: colores.suave, fontSize: 12, marginTop: 14 },

@@ -67,7 +67,7 @@ function Campo(props: { etiqueta: string; valor: string; onCambio: (t: string) =
   return (
     <View style={{ marginBottom: 8 }}>
       <Text style={estilos.etiqueta}>{props.etiqueta.toUpperCase()}</Text>
-      <TextInput style={estilos.campo} value={props.valor} onChangeText={props.onCambio} placeholder={props.ejemplo}
+      <TextInput style={estilos.campo} placeholderTextColor={colores.suave} value={props.valor} onChangeText={props.onCambio} placeholder={props.ejemplo}
         autoCapitalize={props.minusculas ? 'none' : 'sentences'} />
     </View>
   );
@@ -76,7 +76,7 @@ function Campo(props: { etiqueta: string; valor: string; onCambio: (t: string) =
 const estilos = StyleSheet.create({
   fila: { flexDirection: 'row', gap: 8 },
   etiqueta: { fontSize: 11, fontWeight: '600', color: colores.suave, letterSpacing: 0.4 },
-  campo: { backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 11,
+  campo: { color: colores.tinta, backgroundColor: colores.blanco, borderWidth: 1, borderColor: colores.linea, borderRadius: 11,
     paddingHorizontal: 11, paddingVertical: 9, fontSize: 15, marginTop: 3 },
   cantidad: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginVertical: 6 },
   pasos: { flexDirection: 'row', alignItems: 'center', gap: 14 },
