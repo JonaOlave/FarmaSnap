@@ -12,7 +12,7 @@
     },
     "android": {
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+        "backgroundColor": "#0f8a75",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -20,7 +20,8 @@
       "predictiveBackGestureEnabled": false,
       "package": "com.jonaolave.farmasnap",
       "blockedPermissions": [
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ]
     },
     "web": {
@@ -32,9 +33,9 @@
       [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#0f8a75",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 140
         }
       ],
       [
@@ -42,6 +43,14 @@
         {
           "cameraPermission": "FarmaSnap usa la cámara para leer las cajas de los medicamentos.",
           "recordAudioAndroidPermission": false
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "FarmaSnap usa tus fotos para leer las cajas de los medicamentos.",
+          "cameraPermission": false,
+          "microphonePermission": false
         }
       ]
     ],

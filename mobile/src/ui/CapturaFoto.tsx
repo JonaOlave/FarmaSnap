@@ -1,4 +1,5 @@
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { launchImageLibraryAsync } from 'expo-image-picker';
 import { useRef, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -20,11 +21,26 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
 
   if (!permiso) return <View style={estilos.negro} />;
 
+  async function elegirDeGaleria() {
+    if (procesando) return;
+    setProcesando(true);
+    try {
+      const resultado = await launchImageLibraryAsync({ mediaTypes: ['images'], quality: 0.9 });
+      const foto = resultado.canceled ? undefined : resultado.assets[0];
+      if (foto) onCaptura(await prepararFoto(foto.uri, foto.width, foto.height));
+    } catch {
+      Alert.alert('No se pudo abrir la foto', 'Inténtalo de nuevo.');
+    } finally {
+      setProcesando(false);
+    }
+  }
+
   if (!permiso.granted) {
     return (
       <View style={estilos.permiso}>
         <Text style={estilos.permisoTexto}>FarmaSnap necesita la cámara para leer las cajas de los medicamentos.</Text>
         <Boton titulo="Permitir cámara" onPress={() => { pedirPermiso(); }} />
+        <Boton titulo="Elegir de la galería" variante="secundario" onPress={elegirDeGaleria} />
         <Boton titulo="Cancelar" variante="secundario" onPress={onCancelar} />
       </View>
     );
@@ -53,7 +69,9 @@ export function CapturaFoto({ onCaptura, onCancelar, indicacion = 'Encuadra el f
         <Pressable accessibilityLabel="Tomar foto" onPress={capturar} disabled={procesando} style={estilos.obturador}>
           {procesando ? <ActivityIndicator color={colores.blanco} /> : <View style={estilos.obturadorInterno} />}
         </Pressable>
-        <View style={estilos.lado} />
+        <Pressable onPress={elegirDeGaleria} disabled={procesando} style={estilos.lado}>
+          <Text style={[estilos.cancelar, estilos.derecha]}>Galería</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -70,6 +88,7 @@ const estilos = StyleSheet.create({
     flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingHorizontal: 24 },
   lado: { width: 80 },
   cancelar: { color: colores.blanco, fontSize: 15 },
+  derecha: { textAlign: 'right' },
   obturador: { width: 72, height: 72, borderRadius: 36, borderWidth: 4, borderColor: colores.blanco,
     alignItems: 'center', justifyContent: 'center' },
   obturadorInterno: { width: 54, height: 54, borderRadius: 27, backgroundColor: colores.blanco },
