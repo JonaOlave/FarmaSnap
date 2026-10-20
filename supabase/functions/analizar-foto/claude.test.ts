@@ -90,3 +90,9 @@ Deno.test("extraerReceta: una negativa o una respuesta cortada es un error", asy
     await assertRejects(() => extraerReceta(cliente, "QUJD"), ErrorExtraccion);
   }
 });
+
+Deno.test("un JSON inválido es un error sin el texto de la respuesta", async () => {
+  const { cliente } = clienteFalso({ stop_reason: "end_turn", content: [{ type: "text", text: "Fesema 2 puff cada 6 hrs" }] });
+  const error = await assertRejects(() => extraerReceta(cliente, "QUJD"), ErrorExtraccion);
+  assertEquals(error.message, "json_invalido");
+});

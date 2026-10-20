@@ -116,3 +116,11 @@ Deno.test("ESQUEMA_RECETA exige todas sus propiedades y no admite extras", () =>
   assertEquals(item.additionalProperties, false);
   assertEquals([...item.required].sort(), Object.keys(item.properties).sort());
 });
+
+Deno.test("validarReceta mantiene el mismo medicamento con dosis distintas", () => {
+  const r = validarReceta({
+    es_receta: true,
+    medicamentos: [itemReceta("Paracetamol", { dosis: "500 mg" }), itemReceta("paracetamol", { dosis: "1 g" })],
+  });
+  assertEquals(r.medicamentos.map((m) => m.dosis), ["500 mg", "1 g"]);
+});

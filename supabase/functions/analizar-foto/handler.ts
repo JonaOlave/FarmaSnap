@@ -41,7 +41,8 @@ export function crearHandler(deps: Dependencias) {
       try {
         return json(await (tipo === "receta" ? deps.extraerReceta(imagen) : deps.extraer(imagen)), 200);
       } catch (error) {
-        console.error("Extracción fallida:", error);
+        // Solo el tipo de error: el mensaje puede citar el contenido de la foto.
+        console.error("Extracción fallida:", error instanceof Error ? error.name : "desconocido");
         return json({ error: "ia_no_disponible" }, 502);
       }
     } catch (error) {

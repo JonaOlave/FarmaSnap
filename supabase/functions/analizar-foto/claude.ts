@@ -53,7 +53,12 @@ async function pedir(
   }
   const bloque = respuesta.content.find((b) => b.type === "text");
   if (!bloque?.text) throw new ErrorExtraccion("sin_texto");
-  return JSON.parse(bloque.text);
+  try {
+    return JSON.parse(bloque.text);
+  } catch {
+    // Sin el error original: su mensaje cita la respuesta, que puede traer datos de salud.
+    throw new ErrorExtraccion("json_invalido");
+  }
 }
 
 export async function extraerDeImagen(cliente: ClienteMensajes, imagenBase64: string): Promise<Extraccion> {

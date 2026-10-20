@@ -150,20 +150,25 @@ export function validarReceta(dato: unknown): ExtraccionReceta {
   }
   const d = dato as Record<string, unknown>;
   if (d.es_receta !== true) return { es_receta: false, medicamentos: [] };
-  const vistos = new Set<string>();
   const medicamentos: MedicamentoRecetado[] = [];
+  // Repetido: mismo nombre y misma dosis, o mismo nombre y a uno de los dos le falta la dosis.
+  const repetido = (nombre: string, dosis: string | null) =>
+    medicamentos.some((m) =>
+      claveNombre(m.nombre) === claveNombre(nombre) &&
+      (m.dosis === null || dosis === null || claveNombre(m.dosis) === claveNombre(dosis))
+    );
   for (const item of Array.isArray(d.medicamentos) ? d.medicamentos : []) {
     if (typeof item !== "object" || item === null) continue;
     const m = item as Record<string, unknown>;
     const nombre = textoONuloDe(m.nombre);
-    if (nombre === null || vistos.has(claveNombre(nombre))) continue;
-    vistos.add(claveNombre(nombre));
+    const dosis = textoONuloDe(m.dosis);
+    if (nombre === null || repetido(nombre, dosis)) continue;
     const principios = limpiarPrincipios(m.principios_activos);
     medicamentos.push({
       nombre,
       principios_activos: principios,
       principios_deducidos: m.principios_deducidos === true && principios.length > 0,
-      dosis: textoONuloDe(m.dosis),
+      dosis,
       forma: textoONuloDe(m.forma)?.toLowerCase() ?? null,
     });
   }

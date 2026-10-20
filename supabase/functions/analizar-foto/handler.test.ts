@@ -130,3 +130,16 @@ Deno.test("502 si falla la lectura de la receta", async () => {
   assertEquals(r.estado, 502);
   assertEquals(r.cuerpo, { error: "ia_no_disponible" });
 });
+
+Deno.test("un fallo de la IA no escribe el detalle del error en los logs", async () => {
+  const original = console.error;
+  const escrito: unknown[] = [];
+  console.error = (...args: unknown[]) => escrito.push(...args);
+  try {
+    const d = deps({ extraerReceta: () => Promise.reject(new SyntaxError('Unexpected token "Fesema 2 puff"')) });
+    await llamar(d, peticion({ imagen_base64: IMAGEN, tipo: "receta" }));
+  } finally {
+    console.error = original;
+  }
+  assertEquals(escrito.some((x) => String(x instanceof Error ? x.message : x).includes("Fesema")), false);
+});
