@@ -4,8 +4,9 @@ import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'rea
 import { useInventario } from '../../src/datos/InventarioContext';
 import { actualizarMedicamento, eliminarMedicamento, ErrorDuplicado } from '../../src/datos/medicamentos';
 import { buscarDuplicado } from '../../src/dominio/buscar';
-import { textoCantidad } from '../../src/dominio/formato';
+import { detalleEnUso, textoCantidad } from '../../src/dominio/formato';
 import type { ValoresFormulario } from '../../src/dominio/tipos';
+import { ajustarEnvase } from '../../src/ui/ajustarEnvase';
 import { Boton } from '../../src/ui/Boton';
 import { confirmar } from '../../src/ui/confirmar';
 import { FormularioMedicamento } from '../../src/ui/FormularioMedicamento';
@@ -13,7 +14,7 @@ import { colores } from '../../src/ui/tema';
 
 export default function Detalle() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { medicamentos, fotos, sinConexion, ajustar, recargar } = useInventario();
+  const { medicamentos, fotos, sinConexion, ajustar, marcarEnUso, recargar } = useInventario();
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
   const encontrado = medicamentos.find((m) => m.id === id);
@@ -61,14 +62,11 @@ export default function Detalle() {
   }
 
   function alAjustar(delta: number) {
-    const hacer = () => ajustar(m.id, delta).catch(() => Alert.alert('No se pudo actualizar', 'Revisa tu conexión.'));
-    if (delta < 0 && m.cantidad_envases === 1) {
-      confirmar('¿Se acabó?', `${m.nombre_comercial} quedará como "Sin stock".`, 'Sí, se acabó').then((ok) => {
-        if (ok) hacer();
-      });
-    } else {
-      hacer();
-    }
+    ajustarEnvase(m, delta, { ajustar, marcarEnUso });
+  }
+
+  function alternarEnUso() {
+    marcarEnUso(m.id, !m.caja_en_uso).catch(() => Alert.alert('No se pudo actualizar', 'Revisa tu conexión.'));
   }
 
   const fotoUrl = m.foto_path ? fotos[m.foto_path] : undefined;
@@ -108,6 +106,9 @@ export default function Detalle() {
             <View>
               <Text style={estilos.cantidadEtiqueta}>En casa</Text>
               <Text style={estilos.cantidadValor}>{textoCantidad(m.cantidad_envases)}</Text>
+              {m.caja_en_uso && m.cantidad_envases > 0 && (
+                <Text style={estilos.cantidadEtiqueta}>{detalleEnUso(m.cantidad_envases)}</Text>
+              )}
             </View>
             <View style={estilos.pasos}>
               <Pressable accessibilityLabel="Restar un envase" disabled={sinConexion || m.cantidad_envases === 0}
@@ -120,6 +121,16 @@ export default function Detalle() {
               </Pressable>
             </View>
           </View>
+
+          {m.cantidad_envases > 0 && (
+            <Pressable accessibilityRole="checkbox" accessibilityState={{ checked: m.caja_en_uso, disabled: sinConexion }}
+              disabled={sinConexion} onPress={alternarEnUso} style={[estilos.enUso, sinConexion && { opacity: 0.4 }]}>
+              <View style={[estilos.casilla, m.caja_en_uso && estilos.casillaMarcada]}>
+                {m.caja_en_uso && <Text style={estilos.check}>✓</Text>}
+              </View>
+              <Text style={estilos.enUsoTexto}>Hay una caja en uso</Text>
+            </Pressable>
+          )}
 
           <Text style={estilos.auditoria}>
             Último cambio: {autor ?? 'desconocido'} · {fecha(m.actualizado_en)}
@@ -161,5 +172,11 @@ const estilos = StyleSheet.create({
   pasos: { flexDirection: 'row', gap: 10 },
   paso: { width: 42, height: 42, borderRadius: 12, backgroundColor: colores.blanco, alignItems: 'center', justifyContent: 'center' },
   pasoTexto: { fontSize: 22, fontWeight: '700', color: colores.marcaOscuro },
+  enUso: { flexDirection: 'row', alignItems: 'center', gap: 10, paddingVertical: 12, paddingHorizontal: 4 },
+  casilla: { width: 24, height: 24, borderRadius: 6, borderWidth: 2, borderColor: colores.marca,
+    alignItems: 'center', justifyContent: 'center', backgroundColor: colores.blanco },
+  casillaMarcada: { backgroundColor: colores.marca },
+  check: { color: colores.blanco, fontSize: 15, fontWeight: '700' },
+  enUsoTexto: { fontSize: 15, color: colores.tinta },
   auditoria: { textAlign: 'center', fontSize: 12, color: colores.suave, marginVertical: 12 },
 });

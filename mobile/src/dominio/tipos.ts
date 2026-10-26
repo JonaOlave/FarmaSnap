@@ -9,6 +9,7 @@ export interface DatosMedicamento {
 export interface Medicamento extends DatosMedicamento {
   id: string;
   cantidad_envases: number;
+  caja_en_uso: boolean;
   foto_path: string | null;
   creado_en: string;
   actualizado_en: string;

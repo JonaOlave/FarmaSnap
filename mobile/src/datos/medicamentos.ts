@@ -3,7 +3,7 @@ import type { DatosMedicamento, Medicamento, ValoresFormulario } from '../domini
 import { supabase } from './supabase';
 
 const COLUMNAS =
-  'id,nombre_comercial,principios_activos,dosis,forma,laboratorio,cantidad_envases,foto_path,creado_en,actualizado_en,actualizado_por_email';
+  'id,nombre_comercial,principios_activos,dosis,forma,laboratorio,cantidad_envases,caja_en_uso,foto_path,creado_en,actualizado_en,actualizado_por_email';
 const BUCKET = 'fotos';
 
 export class ErrorDuplicado extends Error {
@@ -39,6 +39,12 @@ export async function actualizarMedicamento(id: string, datos: DatosMedicamento)
 
 export async function ajustarEnvases(id: string, delta: number): Promise<Medicamento> {
   const { data, error } = await supabase.rpc('ajustar_envases', { p_id: id, p_delta: delta });
+  lanzar(error);
+  return data as Medicamento;
+}
+
+export async function marcarCajaEnUso(id: string, enUso: boolean): Promise<Medicamento> {
+  const { data, error } = await supabase.from('medicamentos').update({ caja_en_uso: enUso }).eq('id', id).select(COLUMNAS).single();
   lanzar(error);
   return data as Medicamento;
 }

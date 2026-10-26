@@ -2,7 +2,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import type { Medicamento } from '../dominio/tipos';
 import { guardarCache, leerCache } from './cache';
-import { ajustarEnvases, listarMedicamentos, urlsFirmadas } from './medicamentos';
+import { ajustarEnvases, listarMedicamentos, marcarCajaEnUso, urlsFirmadas } from './medicamentos';
 import { supabase } from './supabase';
 
 interface ValorInventario {
@@ -15,6 +15,7 @@ interface ValorInventario {
   actualizadoEn: string | null;
   recargar: () => Promise<Medicamento[]>;
   ajustar: (id: string, delta: number) => Promise<void>;
+  marcarEnUso: (id: string, enUso: boolean) => Promise<void>;
 }
 
 const Contexto = createContext<ValorInventario | null>(null);
@@ -49,14 +50,21 @@ export function InventarioProvider({ activo, children }: { activo: boolean; chil
     }
   }, []);
 
-  const ajustar = useCallback(async (id: string, delta: number) => {
-    const actualizado = await ajustarEnvases(id, delta);
+  const reemplazar = useCallback((actualizado: Medicamento) => {
     setMedicamentos((lista) => {
-      const nueva = lista.map((m) => (m.id === id ? actualizado : m));
+      const nueva = lista.map((m) => (m.id === actualizado.id ? actualizado : m));
       guardarCache(nueva);
       return nueva;
     });
   }, []);
+
+  const ajustar = useCallback(async (id: string, delta: number) => {
+    reemplazar(await ajustarEnvases(id, delta));
+  }, [reemplazar]);
+
+  const marcarEnUso = useCallback(async (id: string, enUso: boolean) => {
+    reemplazar(await marcarCajaEnUso(id, enUso));
+  }, [reemplazar]);
 
   useEffect(() => {
     if (!activo) {
@@ -91,8 +99,8 @@ export function InventarioProvider({ activo, children }: { activo: boolean; chil
   }, [activo, recargar]);
 
   const valor = useMemo(
-    () => ({ medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar }),
-    [medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar],
+    () => ({ medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar, marcarEnUso }),
+    [medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar, marcarEnUso],
   );
   return <Contexto.Provider value={valor}>{children}</Contexto.Provider>;
 }

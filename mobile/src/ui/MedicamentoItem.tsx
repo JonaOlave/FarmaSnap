@@ -26,7 +26,7 @@ export function MedicamentoItem({ medicamento: m, fotoUrl, deshabilitado, onAjus
       <View style={estilos.info}>
         <Text style={estilos.nombre} numberOfLines={1}>{[m.nombre_comercial, m.dosis].filter(Boolean).join(' ')}</Text>
         <Text style={estilos.detalle} numberOfLines={1}>{detalle || 'Sin principio activo'}</Text>
-        <Text style={[estilos.cantidad, sinStock && { color: colores.no }]}>{textoCantidad(m.cantidad_envases)}</Text>
+        <Text style={[estilos.cantidad, sinStock && { color: colores.no }]}>{textoCantidad(m.cantidad_envases, m.caja_en_uso)}</Text>
       </View>
       <Pressable accessibilityLabel={`Restar un envase de ${m.nombre_comercial}`} disabled={deshabilitado || sinStock}
         onPress={() => onAjustar(-1)} style={[estilos.paso, (deshabilitado || sinStock) && estilos.inactivo]}>

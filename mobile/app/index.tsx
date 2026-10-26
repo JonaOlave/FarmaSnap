@@ -1,11 +1,12 @@
 import { router, Stack } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Alert, FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useInventario } from '../src/datos/InventarioContext';
 import { supabase } from '../src/datos/supabase';
 import { buscarPorTexto } from '../src/dominio/buscar';
 import type { Medicamento } from '../src/dominio/tipos';
+import { ajustarEnvase } from '../src/ui/ajustarEnvase';
 import { AvisoConexion } from '../src/ui/AvisoConexion';
 import { confirmar } from '../src/ui/confirmar';
 import { MedicamentoItem } from '../src/ui/MedicamentoItem';
@@ -14,7 +15,7 @@ import { colores } from '../src/ui/tema';
 type Filtro = 'todos' | 'con' | 'sin';
 
 export default function Inventario() {
-  const { medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar } = useInventario();
+  const { medicamentos, fotos, cargando, sinConexion, actualizadoEn, recargar, ajustar, marcarEnUso } = useInventario();
   const [consulta, setConsulta] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
   const [refrescando, setRefrescando] = useState(false);
@@ -30,15 +31,7 @@ export default function Inventario() {
   const conStock = medicamentos.filter((m) => m.cantidad_envases > 0).length;
 
   function alAjustar(m: Medicamento, delta: number) {
-    const hacer = () =>
-      ajustar(m.id, delta).catch(() => Alert.alert('No se pudo actualizar', 'Revisa tu conexión e inténtalo de nuevo.'));
-    if (delta < 0 && m.cantidad_envases === 1) {
-      confirmar('¿Se acabó?', `${m.nombre_comercial} quedará como "Sin stock".`, 'Sí, se acabó').then((ok) => {
-        if (ok) hacer();
-      });
-    } else {
-      hacer();
-    }
+    ajustarEnvase(m, delta, { ajustar, marcarEnUso });
   }
 
   async function salir() {

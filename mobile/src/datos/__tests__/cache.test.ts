@@ -8,7 +8,7 @@ import { guardarCache, haceCuanto, leerCache } from '../cache';
 
 const kitadol: Medicamento = {
   id: '1', nombre_comercial: 'Kitadol', principios_activos: ['paracetamol'], dosis: '500 mg', forma: null,
-  laboratorio: null, cantidad_envases: 2, foto_path: null, creado_en: '', actualizado_en: '', actualizado_por_email: null,
+  laboratorio: null, cantidad_envases: 2, caja_en_uso: false, foto_path: null, creado_en: '', actualizado_en: '', actualizado_por_email: null,
 };
 
 beforeEach(() => AsyncStorage.clear());

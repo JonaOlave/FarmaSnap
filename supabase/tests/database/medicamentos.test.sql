@@ -2,6 +2,9 @@ begin;
 create extension if not exists pgtap with schema extensions;
 select plan(13);
 
+-- Partir de una tabla vacía; el rollback final deja los datos locales como estaban.
+delete from public.medicamentos;
+
 insert into auth.users (id, email)
 values ('11111111-1111-1111-1111-111111111111', 'maria@familia.cl');
 

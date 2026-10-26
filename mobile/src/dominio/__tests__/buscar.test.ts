@@ -4,7 +4,7 @@ import type { Medicamento } from '../tipos';
 function med(id: string, nombre: string, principios: string[], cantidad = 1, dosis: string | null = null): Medicamento {
   return {
     id, nombre_comercial: nombre, principios_activos: principios, dosis, forma: null, laboratorio: null,
-    cantidad_envases: cantidad, foto_path: null, creado_en: '', actualizado_en: '', actualizado_por_email: null,
+    cantidad_envases: cantidad, caja_en_uso: false, foto_path: null, creado_en: '', actualizado_en: '', actualizado_por_email: null,
   };
 }
 

@@ -41,6 +41,13 @@ Ejecutar en un Android con Expo Go (o con el APK) antes de cada versión. Marcar
 - [ ] Editar datos y guardar; editar a un duplicado muestra "Ya existe".
 - [ ] Eliminar con confirmación.
 
+## Caja en uso
+- [ ] En la ficha, marcar "Hay una caja en uso": con 3 envases se lee "1 en uso, 2 nuevos" y en la lista "3 envases · 1 en uso, 2 nuevos".
+- [ ] Con una caja en uso, "−" baja un envase y quita la marca (se terminó la caja abierta).
+- [ ] Al pasar de 2 a 1 envase (desde la ficha o la lista) pregunta si se marca en uso; "Sí, en uso" la marca y "No" la deja nueva.
+- [ ] "+" no cambia la marca; al llegar a 0 la casilla desaparece.
+- [ ] La marca se ve en el otro teléfono sin recargar.
+
 ## Familia y conexión
 - [ ] Un cambio en un teléfono aparece en otro sin recargar.
 - [ ] Modo avión: aviso "Sin conexión · datos de hace…", la lista y la búsqueda por texto funcionan, y los botones de cambio quedan deshabilitados.

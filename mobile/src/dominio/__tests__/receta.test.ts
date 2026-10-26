@@ -8,6 +8,7 @@ function med(parcial: Partial<Medicamento> & Pick<Medicamento, 'id' | 'nombre_co
     forma: null,
     laboratorio: null,
     cantidad_envases: 1,
+    caja_en_uso: false,
     foto_path: null,
     creado_en: '2026-10-20T10:00:00Z',
     actualizado_en: '2026-10-20T10:00:00Z',
