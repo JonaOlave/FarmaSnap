@@ -9,15 +9,18 @@ interface Props {
   deshabilitado: boolean;
   onAjustar: (delta: number) => void;
   onPress: () => void;
+  onVerFoto: () => void;
 }
 
-export function MedicamentoItem({ medicamento: m, fotoUrl, deshabilitado, onAjustar, onPress }: Props) {
+export function MedicamentoItem({ medicamento: m, fotoUrl, deshabilitado, onAjustar, onPress, onVerFoto }: Props) {
   const sinStock = m.cantidad_envases === 0;
   const detalle = [m.principios_activos.join(' · '), m.forma].filter(Boolean).join(' · ');
   return (
     <Pressable onPress={onPress} style={[estilos.fila, sinStock && estilos.apagado]}>
       {fotoUrl ? (
-        <Image source={{ uri: fotoUrl }} style={estilos.miniatura} />
+        <Pressable accessibilityLabel={`Ver foto de ${m.nombre_comercial}`} onPress={onVerFoto}>
+          <Image source={{ uri: fotoUrl }} style={estilos.miniatura} />
+        </Pressable>
       ) : (
         <View style={[estilos.miniatura, estilos.sinFoto]}>
           <Text style={estilos.inicial}>{m.nombre_comercial.charAt(0).toUpperCase()}</Text>

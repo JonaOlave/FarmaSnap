@@ -9,6 +9,7 @@ import type { Medicamento } from '../src/dominio/tipos';
 import { ajustarEnvase } from '../src/ui/ajustarEnvase';
 import { AvisoConexion } from '../src/ui/AvisoConexion';
 import { confirmar } from '../src/ui/confirmar';
+import { FotoCompleta } from '../src/ui/FotoCompleta';
 import { MedicamentoItem } from '../src/ui/MedicamentoItem';
 import { colores } from '../src/ui/tema';
 
@@ -19,6 +20,7 @@ export default function Inventario() {
   const [consulta, setConsulta] = useState('');
   const [filtro, setFiltro] = useState<Filtro>('todos');
   const [refrescando, setRefrescando] = useState(false);
+  const [fotoAbierta, setFotoAbierta] = useState<string | null>(null);
   const margen = useSafeAreaInsets();
 
   const visibles = useMemo(
@@ -85,16 +87,22 @@ export default function Inventario() {
             {cargando ? 'Cargando…' : consulta ? 'No hay coincidencias en casa.' : 'Aún no hay medicamentos. Registra el primero.'}
           </Text>
         }
-        renderItem={({ item }) => (
-          <MedicamentoItem
-            medicamento={item}
-            fotoUrl={item.foto_path ? fotos[item.foto_path] : undefined}
-            deshabilitado={sinConexion}
-            onAjustar={(delta) => alAjustar(item, delta)}
-            onPress={() => router.push({ pathname: '/medicamento/[id]', params: { id: item.id } })}
-          />
-        )}
+        renderItem={({ item }) => {
+          const fotoUrl = item.foto_path ? fotos[item.foto_path] : undefined;
+          return (
+            <MedicamentoItem
+              medicamento={item}
+              fotoUrl={fotoUrl}
+              deshabilitado={sinConexion}
+              onAjustar={(delta) => alAjustar(item, delta)}
+              onPress={() => router.push({ pathname: '/medicamento/[id]', params: { id: item.id } })}
+              onVerFoto={() => setFotoAbierta(fotoUrl ?? null)}
+            />
+          );
+        }}
       />
+
+      <FotoCompleta uri={fotoAbierta} onCerrar={() => setFotoAbierta(null)} />
 
       <Pressable disabled={sinConexion} onPress={() => router.push('/registrar')}
         style={[estilos.fab, { bottom: 24 + margen.bottom }, sinConexion && estilos.inactivo]}>

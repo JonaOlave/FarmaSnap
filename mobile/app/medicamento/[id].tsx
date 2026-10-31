@@ -1,15 +1,21 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useInventario } from '../../src/datos/InventarioContext';
-import { actualizarMedicamento, eliminarMedicamento, ErrorDuplicado } from '../../src/datos/medicamentos';
+import { guardarConFoto } from '../../src/datos/cambiarFoto';
+import type { FotoPreparada } from '../../src/datos/imagen';
+import {
+  actualizarMedicamento, eliminarFoto, eliminarMedicamento, ErrorDuplicado, subirFoto,
+} from '../../src/datos/medicamentos';
 import { buscarDuplicado } from '../../src/dominio/buscar';
 import { detalleEnUso, textoCantidad } from '../../src/dominio/formato';
 import type { ValoresFormulario } from '../../src/dominio/tipos';
 import { ajustarEnvase } from '../../src/ui/ajustarEnvase';
 import { Boton } from '../../src/ui/Boton';
+import { CapturaFoto } from '../../src/ui/CapturaFoto';
 import { confirmar } from '../../src/ui/confirmar';
 import { FormularioMedicamento } from '../../src/ui/FormularioMedicamento';
+import { FotoCompleta } from '../../src/ui/FotoCompleta';
 import { colores } from '../../src/ui/tema';
 
 export default function Detalle() {
@@ -17,6 +23,9 @@ export default function Detalle() {
   const { medicamentos, fotos, sinConexion, ajustar, marcarEnUso, recargar } = useInventario();
   const [editando, setEditando] = useState(false);
   const [guardando, setGuardando] = useState(false);
+  const [fotoNueva, setFotoNueva] = useState<FotoPreparada | null>(null);
+  const [capturando, setCapturando] = useState(false);
+  const [verFoto, setVerFoto] = useState(false);
   const encontrado = medicamentos.find((m) => m.id === id);
 
   if (!encontrado) {
@@ -38,8 +47,15 @@ export default function Detalle() {
     setGuardando(true);
     try {
       const { cantidad_envases: _sinUso, ...datos } = v;
-      await actualizarMedicamento(m.id, datos);
+      await guardarConFoto(fotoNueva?.base64 ?? null, m.foto_path, {
+        subir: subirFoto,
+        eliminar: eliminarFoto,
+        guardar: async (foto_path) => {
+          await actualizarMedicamento(m.id, foto_path ? { ...datos, foto_path } : datos);
+        },
+      });
       await recargar();
+      setFotoNueva(null);
       setEditando(false);
     } catch (error) {
       Alert.alert(error instanceof ErrorDuplicado
@@ -69,19 +85,41 @@ export default function Detalle() {
     marcarEnUso(m.id, !m.caja_en_uso).catch(() => Alert.alert('No se pudo actualizar', 'Revisa tu conexión.'));
   }
 
-  const fotoUrl = m.foto_path ? fotos[m.foto_path] : undefined;
+  function cancelarEdicion() {
+    setFotoNueva(null);
+    setEditando(false);
+  }
+
+  // Mientras se edita, la foto nueva (aún sin guardar) reemplaza a la actual.
+  const fotoUrl = fotoNueva?.uri ?? (m.foto_path ? fotos[m.foto_path] : undefined);
   const autor = m.actualizado_por_email?.split('@')[0];
   const fecha = (iso: string) => new Date(iso).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' });
 
   return (
     <ScrollView contentContainerStyle={estilos.contenido} keyboardShouldPersistTaps="handled">
-      {fotoUrl ? <Image source={{ uri: fotoUrl }} style={estilos.foto} /> : <View style={[estilos.foto, estilos.sinFoto]} />}
+      {fotoUrl ? (
+        <Pressable accessibilityLabel="Ver foto en pantalla completa" onPress={() => setVerFoto(true)}>
+          <Image source={{ uri: fotoUrl }} style={estilos.foto} />
+        </Pressable>
+      ) : (
+        <View style={[estilos.foto, estilos.sinFoto]} />
+      )}
+      <FotoCompleta uri={verFoto ? fotoUrl ?? null : null} onCerrar={() => setVerFoto(false)} />
+      <Modal visible={capturando} animationType="slide" statusBarTranslucent navigationBarTranslucent
+        onRequestClose={() => setCapturando(false)}>
+        <CapturaFoto
+          onCaptura={(foto) => { setFotoNueva(foto); setCapturando(false); }}
+          onCancelar={() => setCapturando(false)}
+        />
+      </Modal>
 
       {editando ? (
         <>
+          <Boton titulo={fotoUrl ? 'Cambiar foto' : 'Agregar foto'} variante="secundario"
+            deshabilitado={guardando} onPress={() => setCapturando(true)} />
           <FormularioMedicamento inicial={m} mostrarCantidad={false} textoGuardar="Guardar cambios"
             guardando={guardando} onGuardar={guardarEdicion} />
-          <Boton titulo="Cancelar" variante="secundario" onPress={() => setEditando(false)} />
+          <Boton titulo="Cancelar" variante="secundario" deshabilitado={guardando} onPress={cancelarEdicion} />
         </>
       ) : (
         <>

@@ -41,6 +41,14 @@ Ejecutar en un Android con Expo Go (o con el APK) antes de cada versión. Marcar
 - [ ] Editar datos y guardar; editar a un duplicado muestra "Ya existe".
 - [ ] Eliminar con confirmación.
 
+## Foto
+- [ ] Tocar la miniatura en la lista abre la foto a pantalla completa; tocar el resto de la fila abre la ficha.
+- [ ] En la ficha, tocar la foto la abre a pantalla completa; se cierra con ✕ y con "atrás".
+- [ ] Editar → "Cambiar foto" (cámara o galería) muestra la nueva; "Guardar cambios" la deja y en la lista se ve la nueva.
+- [ ] Editar → "Cambiar foto" → "Cancelar" mantiene la foto anterior.
+- [ ] Un medicamento sin foto muestra "Agregar foto" al editar.
+- [ ] Lo escrito en el formulario no se pierde al cambiar la foto.
+
 ## Caja en uso
 - [ ] En la ficha, marcar "Hay una caja en uso": con 3 envases se lee "1 en uso, 2 nuevos" y en la lista "3 envases · 1 en uso, 2 nuevos".
 - [ ] Con una caja en uso, "−" baja un envase y quita la marca (se terminó la caja abierta).

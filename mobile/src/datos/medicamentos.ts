@@ -31,7 +31,9 @@ export async function crearMedicamento(v: ValoresFormulario & { foto_path: strin
   return data as Medicamento;
 }
 
-export async function actualizarMedicamento(id: string, datos: DatosMedicamento): Promise<Medicamento> {
+export async function actualizarMedicamento(
+  id: string, datos: DatosMedicamento & { foto_path?: string },
+): Promise<Medicamento> {
   const { data, error } = await supabase.from('medicamentos').update(datos).eq('id', id).select(COLUMNAS).single();
   lanzar(error);
   return data as Medicamento;
